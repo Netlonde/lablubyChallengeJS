@@ -1,0 +1,60 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header{
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+form{
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    padding: 20px;
+}
+
+li{
+    font-weight: 600;
+    width: 100%;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+
+th{
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+img{
+    max-height: 200px;
+    max-width: 200px;
+}
+
+button{
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    padding: 4px;
+    font-weight: 600;
+}
+
+.container{
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    margin-top: 80px;
+}
