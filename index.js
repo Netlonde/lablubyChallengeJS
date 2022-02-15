@@ -12,14 +12,17 @@
   */
 
     function app(){
+      const ajax = new XMLHttpRequest();
+      const site = 'http://localhost:3001/car';
+      let car = new Array();
+
       return{
         init: function(){
           this.companyInfo();
-          this.initEvents();
+          setTimeout(() => this.initEvents(),300)
         },
 
         companyInfo: function companyInfo(){
-          const ajax = new XMLHttpRequest();
           ajax.open('GET', 'company.json', true);
           ajax.send();
           ajax.addEventListener('readystatechange', this.getCompanyInfo, false)
@@ -27,23 +30,20 @@
 
         initEvents: function initEvents(){
           const $form = new DOM('.form');
-
           $form.on('submit', this.handleSubmit);
+
+          this.getCarInServer();
         },
 
         handleSubmit: function handleSubmit(e){
           e.preventDefault();
 
-          const $table = new DOM('.table').get();
-
-          $table.appendChild(app().newCar());
+          app().newCar();
         },
 
         newCar: function newCar(){
-          const $fragment = document.createDocumentFragment();
           const $tr = document.createElement('tr');
           $tr.id = (Math.random()*100000);
-          const $tdImage = document.createElement('td');
           const $image = document.createElement('img');
           const $tdModel = document.createElement('td');
           const $tdYear = document.createElement('td');
@@ -58,10 +58,75 @@
           $tdColor.textContent = new DOM('.color').get().value;
           
           this.createDeleteButton($removeIten, $tr.id);
-          this.createTable($tdImage, $image);
-          this.createTable($tr, $tdImage, $tdModel, $tdYear, $tdPlate, $tdColor, $removeIten)
+
+          try{
+            this.createCarInServer($image.src, $tdModel.textContent, 
+                                   $tdYear.textContent, $tdPlate.textContent, 
+                                   $tdColor.textContent); 
+          }catch{
+            return;
+          }
+            
+        },
+
+        addCarOnTable(car){
+          const $table = new DOM('.table').get();
+          const $fragment = document.createDocumentFragment();
+          const $tr = document.createElement('tr');
+          $tr.id = (Math.random()*100000);
+          const $tdImage = document.createElement('td');
+          const $image = document.createElement('img');
+          const $tdModel = document.createElement('td');
+          const $tdYear = document.createElement('td');
+          const $tdPlate = document.createElement('td');
+          const $tdColor = document.createElement('td');
+          const $removeIten = document.createElement('td');
+
+          $image.src = car.image;
+          $tdModel.textContent = car.brandModel;
+          $tdYear.textContent = car.year;    
+          $tdPlate.textContent = car.plate;
+          $tdColor.textContent = car.color;
           
-          return $fragment.appendChild($tr);
+          this.createDeleteButton($removeIten, $tr.id);
+
+          this.createTable($tdImage, $image);
+          this.createTable($tr, $tdImage, $tdModel, $tdYear, $tdPlate, $tdColor, $removeIten);
+          this.createTable($fragment, $tr);
+          this.createTable($table ,$fragment);
+        },
+
+        createCarInServer(image, brandModel, year, plate, color){
+          ajax.open('POST', site);
+          ajax.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+
+          const carData = JSON.stringify({
+            image,
+            brandModel,
+            year,
+            plate, 
+            color
+          })
+
+          ajax.send(carData);
+        },
+
+        getCarInServer(){
+          ajax.open('GET', site);
+          ajax.send();
+
+          ajax.addEventListener('readystatechange', () => {
+            if(ajax.readyState === 4 && ajax.status === 200) {
+              let res = JSON.parse(ajax.responseText);
+              res.map((carSever) => {
+                car.push(carSever);
+              });
+              
+              car.forEach((carElement) => {
+                this.addCarOnTable(carElement);
+              })
+            }
+          }, false)
         },
 
         createTable(parentElement){
@@ -87,10 +152,14 @@
           if(!app().isReady.call(this)) return;
 
           const data = JSON.parse(this.responseText);
-          const $companyName = (new DOM('.company-name')).get();
-          const $companyNumber = (new DOM('.company-number')).get();
-          $companyName.innerHTML = data.name;
-          $companyNumber.innerHTML = data.phone;
+
+          
+          if(data.name !== undefined && data.phone !== undefined){
+            const $companyName = (new DOM('.company-name')).get();
+            const $companyNumber = (new DOM('.company-number')).get();
+            $companyName.innerHTML = data.name;
+            $companyNumber.innerHTML = data.phone;
+          } 
         },
 
         isReady: function isReady(){
