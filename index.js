@@ -57,7 +57,7 @@
           $tdPlate.textContent = new DOM('.plate').get().value;
           $tdColor.textContent = new DOM('.color').get().value;
           
-          this.createDeleteButton($removeIten, $tr.id);
+          this.createDeleteButton($removeIten, $tdPlate.textContent);
 
           try{
             this.createCarInServer($image.src, $tdModel.textContent, 
@@ -73,7 +73,6 @@
           const $table = new DOM('.table').get();
           const $fragment = document.createDocumentFragment();
           const $tr = document.createElement('tr');
-          $tr.id = (Math.random()*100000);
           const $tdImage = document.createElement('td');
           const $image = document.createElement('img');
           const $tdModel = document.createElement('td');
@@ -87,8 +86,9 @@
           $tdYear.textContent = car.year;    
           $tdPlate.textContent = car.plate;
           $tdColor.textContent = car.color;
-          
-          this.createDeleteButton($removeIten, $tr.id);
+
+          if($tdPlate.textContent)
+            this.createDeleteButton($removeIten, $tdPlate.textContent);
 
           this.createTable($tdImage, $image);
           this.createTable($tr, $tdImage, $tdModel, $tdYear, $tdPlate, $tdColor, $removeIten);
@@ -135,17 +135,18 @@
           }
         },
 
-        createDeleteButton($removeIten, id){
+        createDeleteButton($removeIten, plate){
           const $removeButton = document.createElement('button');
           $removeButton.innerHTML = 'Remover';
-          $removeButton.addEventListener('click',() => this.handleDelete(id));
+          $removeButton.addEventListener('click',() => this.handleDelete(plate));
           $removeIten.appendChild($removeButton);
         },
 
-        handleDelete: function(id){
-          const childElement = document.getElementById(id); 
-          const table = document.querySelector('.table')//.removeChild(childElement);
-          table.removeChild(childElement);
+        handleDelete: function(plate){
+          const removeCarDatabase = new XMLHttpRequest();
+          removeCarDatabase.open('DELETE', site);
+          removeCarDatabase.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
+          removeCarDatabase.send(`plate=${plate}`);
         },
         
         getCompanyInfo: function getCompanyInfo(){
